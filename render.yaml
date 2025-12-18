@@ -1,20 +1,19 @@
-services:
-  # 1. The Database (PostgreSQL)
-  - type: psql
-    name: gram-bazaar-db
-    env: docker
+databases:
+  - name: gram-bazaar-db
+    databaseName: gram_bazaar
+    user: gram_user
     plan: free
-    region: singapore # Bangladesh er kache tai fast hobe
-    ipAllowList: [] # Allow all for MVP
+    region: singapore
 
-  # 2. The Backend (FastAPI)
+services:
+  # 1. The Backend (FastAPI)
   - type: web
     name: gram-bazaar-backend
     env: docker
     plan: free
     region: singapore
     rootDir: .
-    dockerContext: backend # Points to backend folder
+    dockerContext: backend
     dockerfilePath: backend/Dockerfile
     envVars:
       - key: DATABASE_URL
@@ -22,17 +21,17 @@ services:
           name: gram-bazaar-db
           property: connectionString
       - key: PORT
-        value: 8000
+        value: "8000"
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
-  # 3. The Frontend (Streamlit)
+  # 2. The Frontend (Streamlit)
   - type: web
     name: gram-bazaar-frontend
     env: docker
     plan: free
     region: singapore
     rootDir: .
-    dockerContext: frontend # Points to frontend folder
+    dockerContext: frontend
     dockerfilePath: frontend/Dockerfile
     envVars:
       - key: BACKEND_URL
@@ -41,5 +40,5 @@ services:
           name: gram-bazaar-backend
           property: url
       - key: PORT
-        value: 8501
+        value: "8501"
     startCommand: streamlit run app.py --server.port 8501 --server.address 0.0.0.0
