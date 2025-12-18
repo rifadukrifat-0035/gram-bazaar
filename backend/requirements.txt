@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-extra-types[phone-numbers]
+python-multipart
+sqlalchemy[asyncio]
+asyncpg
+twilio
+pyotp
