@@ -1,18 +1,25 @@
-# backend/Dockerfile (The Final, Guaranteed Version)
-FROM python:3.9-slim
+# 1. Base Image
+FROM python:3.10-slim
 
-# 1. Set the working directory, this is where our app will live
-WORKDIR /app
+# 2. Set working directory to /code (Not /app to avoid conflict)
+WORKDIR /code
 
-# 2. Copy requirements first to leverage Docker cache
-# This assumes requirements.txt is in the 'backend' folder
+# 3. Install System Dependencies (Optional but good for Postgres)
+RUN apt-get update && apt-get install -y libpq-dev gcc
+
+# 4. Install Python Dependencies
+# We copy requirements first to cache them
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-# 3. Copy the application code from the local 'app' sub-directory
-# The '.' at the end means copy the CONTENTS of 'app' into the WORKDIR (/app)
-# This creates the correct structure: /app/main.py, /app/api, etc.
-COPY ./app .
+# 5. Copy the Application Code
+# This is the MAGIC STEP: We copy the 'app' folder INTO /code/app
+COPY ./app ./app
 
-# 4. Command to run the application. Uvicorn will find 'main.py' in the current WORKDIR.
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# 6. Set PYTHONPATH
+# This tells Python to look for modules inside /code
+ENV PYTHONPATH=/code
+
+# 7. Start Command
+# Uvicorn looks for 'app.main' inside /code
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
